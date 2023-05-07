@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 int main(int argc, char **argv)
 {
 	if (argc != 2)
@@ -10,29 +11,31 @@ int main(int argc, char **argv)
 	struct stat filestat;
 	if (stat(argv[1], &filestat) < 0)
 		return 1;
-	printf("% s details:\n", argv[1]);
-	printf(" file size: % d\n", filestat, st_size);
-	printf(" No.of hard links: % d\n", filestat, st_nlink);
-	printf(" file inode: % d\n", filestat, st_ino);
+	printf("%s details : \n", argv[1]);
+	printf(" file size: %ld \n", filestat.st_size);
+	printf(" No.of hard links: %ld \n", filestat.st_nlink);
+	printf(" file inode: %ld \n", filestat.st_ino);
 	printf(" file permissions:");
-	printf(S_ISDIR(filestat.st_mode) ? "d" : "v");
-	printf((filestat.st_mode & S_IWUSR) ? "w" : ".");
-	printf((filestat.st_mode & S_IXUSR) ? "x" : ".");
-	printf((filestat.st_mode & S_IRGRP) ? "r" : ":");
-	printf((filestat.st_mode & S_IWGRP) ? "w" : ".");
-	printf((filestat.st_mode & S_IXGRP) ? "x" : ".");
-	printf((filestat.st_mode & S_IROTH) ? "r" : ".");
-	printf((filestat.st_mode & S_IWDTH) ? "w" : ".");
-	printf((filestat.st_mode & S_IXOTH) ? "x" : ".");
+	printf(S_ISDIR(filestat.st_mode) ? "d" : "-");
+	printf((filestat.st_mode & S_IWUSR) ? "w" : "-");
+	printf((filestat.st_mode & S_IXUSR) ? "x" : "-");
+	printf((filestat.st_mode & S_IRGRP) ? "r" : "-");
+	printf((filestat.st_mode & S_IWGRP) ? "w" : "-");
+	printf((filestat.st_mode & S_IXGRP) ? "x" : "-");
+	printf((filestat.st_mode & S_IROTH) ? "r" : "-");
+	printf((filestat.st_mode & S_IWOTH) ? "w" : "-");
+	printf((filestat.st_mode & S_IXOTH) ? "x" : "-");
 
 	printf("\n");
 	char timestr[50];
-	struct tm *modified_time = localtime(&filestat.st_time);
-	strftime(timestr, &o, "% b % d % l: % m % p", modified_time);
-	printf("Modified time: % s\n", timestr);
-	struct tm *access_time = localtime(&filestat.st_time);
-	strftime(timestr, &o, "% b % d % l: % m % p", access_time);
-	printf("access time: % s\n", timestr);
+	struct tm *modified_time = localtime(&filestat.st_mtime);
+	strftime(timestr, sizeof(timestr), "%b %d %l:%M %p", modified_time);
+	printf("Modified time: %s \n", timestr);
+
+	struct tm *access_time = localtime(&filestat.st_atime);
+	strftime(timestr, sizeof(timestr), "%b %d %l : %M %p", access_time);
+	printf("Access time: %s \n", timestr);
+
 	return 0;
 }
 

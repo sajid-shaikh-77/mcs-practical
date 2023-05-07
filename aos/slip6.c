@@ -2,10 +2,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #define BUFFER_SIZE 100
 int main(int argc, char const *argv[])
 {
@@ -17,22 +17,34 @@ int main(int argc, char const *argv[])
 	char *addr;
 	char buffer[BUFFER_SIZE];
 	int fd = open(argv[1], O_RDONLY);
+	if (fd == -1)
+
+	{
+		fprintf(stderr, "Error opening file \n");
+		return 1;
+	}
 	struct stat st;
 	if (fstat(fd, &st) < 0)
+
 	{
-		fprintf(stderr, "Error reading file info\n");
+		fprintf(stderr, "Error reading file\n");
+		close(fd);
 		return 1;
 	}
-	if ((addr = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+	addr = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (addr == MAP_FAILED)
 	{
-		fprintf(stderr, "Error mapping file\n");
+		fprintf(stderr, "error mapping file \n");
+		close(fd);
 		return 1;
 	}
-	for (int i = st.st_size; i >= 0; i--)
+
+	for (int i = st.st_size - 1; i >= 0; i--)
 	{
 		printf("%c", addr[i]);
 	}
-	munmap(addr);
+
+	munmap(addr, st.st_size);
 	close(fd);
 	return 0;
 }
